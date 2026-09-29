@@ -71,6 +71,16 @@ class AlunoService{
         }
     }
 
+    async delete(id){
+        const aluno = await this.findById(id);
+
+        await prisma.aluno.delete({
+            where: { id: Number(id) }
+        });
+
+        return aluno;
+    }
+
     async create(aluno){
         const {nome, email} = aluno;
         if(!nome || !email){
