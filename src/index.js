@@ -10,7 +10,9 @@ app.use((request, response, next)=>{
 });
 app.use("/alunos", alunoRoutes);
 
-app.listen(process.env.PORT, ()=>{
-    console.log(`Server running on port ${process.env.PORT}`);
+const port = process.env.PORT || 3000;
+
+app.listen(port, ()=>{
+    console.log(`Server running on port ${port}`);
 });
 
