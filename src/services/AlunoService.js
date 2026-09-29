@@ -35,6 +35,42 @@ class AlunoService{
         return aluno;
     }
 
+    async update(id, dadosAluno){
+        if(!dadosAluno || typeof dadosAluno !== "object" || Object.keys(dadosAluno).length === 0){
+            throw new AlunoInvalidoError("Informe pelo menos um campo válido para atualizar.");
+        }
+
+        const dadosAtualizacao = {};
+        const camposPermitidos = ["nome", "email"];
+
+        for(const campo of camposPermitidos){
+            if(dadosAluno[campo] !== undefined && dadosAluno[campo] !== null && String(dadosAluno[campo]).trim() !== ""){
+                dadosAtualizacao[campo] = dadosAluno[campo];
+            }
+        }
+
+        if(Object.keys(dadosAtualizacao).length === 0){
+            throw new AlunoInvalidoError("Informe pelo menos um campo válido para atualizar.");
+        }
+
+        // Reaproveitamos AlunoInvalidoError para payload vazio/sem campos válidos e para
+        // email duplicado porque ambos representam erro de entrada/validação de negócio,
+        // e o Controller já responde de forma padronizada para qualquer ApiError.
+        await this.findById(id);
+
+        try{
+            return await prisma.aluno.update({
+                where: { id: Number(id) },
+                data: dadosAtualizacao
+            });
+        }catch(error){
+            if(error.code === "P2002"){
+                throw new AlunoInvalidoError("E-mail já cadastrado.");
+            }
+            throw error;
+        }
+    }
+
     async create(aluno){
         const {nome, email} = aluno;
         if(!nome || !email){
